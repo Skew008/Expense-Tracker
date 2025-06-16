@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+
+  # --------------------------------------
+  # MySQL Database
+  # --------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: expense_tracker
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - expense-net
+
+  # --------------------------------------
+  # Eureka Discovery Server
+  # --------------------------------------
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - expense-net
+
+  # --------------------------------------
+  # API Gateway
+  # --------------------------------------
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-server
+    networks:
+      - expense-net
+
+  # --------------------------------------
+  # Auth Service
+  # --------------------------------------
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    expose:
+      - "8081"
+    depends_on:
+      - mysql
+      - eureka-server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/expense_tracker
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    networks:
+      - expense-net
+
+  # --------------------------------------
+  # Expense Service
+  # --------------------------------------
+  expense-service:
+    build: ./expense-service
+    container_name: expense-service
+    expose:
+      - "8082"
+    depends_on:
+      - mysql
+      - eureka-server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/expense_tracker
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    networks:
+      - expense-net
+
+  # --------------------------------------
+  # Goal Service
+  # --------------------------------------
+  goal-service:
+    build: ./goal-service
+    container_name: goal-service
+    expose:
+      - "8083"
+    depends_on:
+      - mysql
+      - eureka-server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/expense_tracker
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    networks:
+      - expense-net
+
+  # --------------------------------------
+  # Analytics Service
+  # --------------------------------------
+  analytics-service:
+    build: ./analytics-service
+    container_name: analytics-service
+    expose:
+      - "8084"
+    depends_on:
+      - expense-service
+      - eureka-server
+    networks:
+      - expense-net
+
+volumes:
+  mysql_data:
+
+networks:
+  expense-net:
