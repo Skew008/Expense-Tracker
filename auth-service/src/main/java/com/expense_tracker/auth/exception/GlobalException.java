@@ -1,7 +1,7 @@
-package com.expense_tracker.auth;
+package com.expense_tracker.auth.exception;
 
 import jakarta.persistence.EntityExistsException;
-import jakarta.ws.rs.BadRequestException;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,5 +23,10 @@ public class GlobalException extends ResponseEntityExceptionHandler {
     @ExceptionHandler(EntityExistsException.class)
     public ResponseEntity<Object> handleEntityAlreadyExist(Exception e, WebRequest webRequest) {
         return handleExceptionInternal(e, e.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT, webRequest);
+    }
+
+    @ExceptionHandler(UserNotFound.class)
+    public ResponseEntity<Object> handleNotFound(Exception e, WebRequest webRequest) {
+        return handleExceptionInternal(e, e.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, webRequest);
     }
 }
