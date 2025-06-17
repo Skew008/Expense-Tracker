@@ -2,8 +2,8 @@ package com.expense_tracker.auth.service;
 
 import com.expense_tracker.auth.dto.UserResponseDto;
 import com.expense_tracker.auth.entity.User;
+import com.expense_tracker.auth.exception.UserNotFound;
 import com.expense_tracker.auth.repository.UserRepository;
-import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -50,7 +50,7 @@ public class UserService {
         Optional<User> user = userRepository.findByEmail(email);
 
         if (user.isEmpty())
-            throw new NotFoundException("User not found");
+            throw new UserNotFound("User not found");
 
         return user.get();
     }

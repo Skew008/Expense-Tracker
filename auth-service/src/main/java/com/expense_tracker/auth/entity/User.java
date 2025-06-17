@@ -2,13 +2,15 @@ package com.expense_tracker.auth.entity;
 
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "users")
 public class User {
 
     @Id
     @GeneratedValue
-    private String id;
+    private UUID id;
     @Column(nullable = false, unique = true)
     private String email;
     @Column(nullable = false)
@@ -20,11 +22,7 @@ public class User {
     }
 
     public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+        return id.toString();
     }
 
     public String getEmail() {
