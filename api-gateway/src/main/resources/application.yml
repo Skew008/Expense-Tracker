@@ -18,17 +18,17 @@ spring:
             - Path=/auth/**, /users/**
 
         - id: expense-service
-          uri: lb://expense-service
+          uri: lb://EXPENSE-SERVICE
           predicates:
             - Path=/expense/**
 
         - id: goal-service
-          uri: lb://goal-service
+          uri: lb://GOAL-SERVICE
           predicates:
             - Path=/goal/**
 
         - id: analytics-service
-          uri: lb://analytics-service
+          uri: lb://ANALYTICS-SERVICE
           predicates:
             - Path=/analytics/**
 
