@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+#      discovery:
+#        locator:
+#          enabled: true
+#          lower-case-service-id: true
+      routes:
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**, /users/**
+
+        - id: expense-service
+          uri: lb://expense-service
+          predicates:
+            - Path=/expense/**
+
+        - id: goal-service
+          uri: lb://goal-service
+          predicates:
+            - Path=/goal/**
+
+        - id: analytics-service
+          uri: lb://analytics-service
+          predicates:
+            - Path=/analytics/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
+
+jwt:
+  secret: mysecretkeyforjwtgeneration1234567890
+
