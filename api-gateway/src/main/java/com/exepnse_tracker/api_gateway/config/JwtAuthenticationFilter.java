@@ -10,6 +10,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -51,9 +52,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                     .parseClaimsJws(token)
                     .getBody();
 
-            // Optionally forward user ID or email downstream
-            exchange.getRequest().mutate()
-                    .header("X-Email", claims.getSubject());
+            ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
+                    .header("X-Email", claims.getSubject())
+                    .build();
+
+            exchange = exchange.mutate().request(mutatedRequest).build();
 
         } catch (Exception ex) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
