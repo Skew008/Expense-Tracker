@@ -92,10 +92,14 @@ public class ExpenseService {
 
     private boolean validateExpense(ExpenseRequest expense) {
 
-        if(expense.amount()<0)
+        if(expense.amount()==null || expense.amount()<0)
             throw new IllegalArgumentException("Amount cannot be negative");
-        if(expense.category()==null || expense.date()==null)
+        if(expense.category()==null || expense.category().isEmpty() || expense.date()==null)
             throw new IllegalArgumentException("Category or Date cannot be empty");
         return true;
+    }
+
+    public Double getTotalByDateRangeAndCategory(String email, LocalDate start, LocalDate end, String category) {
+        return expenseRepository.getTotalByDateRangeAndCategory(email, start, end, category);
     }
 }

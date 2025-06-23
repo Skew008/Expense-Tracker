@@ -55,4 +55,11 @@ public class ExpenseController {
         LocalDate toDate = DateUtil.parseDate(to);
         return ResponseEntity.ok(expenseService.searchExpenses(email, category, fromDate, toDate));
     }
+
+    @GetMapping("total")
+    public Double getTotalExpenses(@RequestHeader("X-Email") String email, @RequestParam String from, @RequestParam String to, @RequestParam(required = false) String category) {
+        LocalDate start = DateUtil.parseDate(from);
+        LocalDate end = DateUtil.parseDate(to);
+        return expenseService.getTotalByDateRangeAndCategory(email, start, end, category);
+    }
 }
