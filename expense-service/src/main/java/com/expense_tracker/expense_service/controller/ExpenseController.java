@@ -60,6 +60,6 @@ public class ExpenseController {
     public Double getTotalExpenses(@RequestHeader("X-Email") String email, @RequestParam String from, @RequestParam String to, @RequestParam(required = false) String category) {
         LocalDate start = DateUtil.parseDate(from);
         LocalDate end = DateUtil.parseDate(to);
-        return expenseService.getTotalByDateRangeAndCategory(email, start, end, category);
+        return expenseService.getTotalByDateRangeAndCategory(email, start, end, category==null ? null : category.toUpperCase());
     }
 }
