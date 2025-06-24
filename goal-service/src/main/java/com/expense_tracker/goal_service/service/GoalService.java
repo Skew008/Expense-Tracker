@@ -38,7 +38,7 @@ public class GoalService {
             goal.setEmail(email);
             goal.setTitle(goalRequest.title());
             goal.setAmount(goalRequest.amount());
-            goal.setCategory(goalRequest.category());
+            goal.setCategory(goalRequest.category().toUpperCase());
             goal.setStartDate(startDate);
             goal.setEndDate(endDate);
             goal.setDescription(goalRequest.description());
@@ -73,7 +73,7 @@ public class GoalService {
             Goal goal = new Goal();
             goal.setTitle(goalRequest.title());
             goal.setAmount(goalRequest.amount());
-            goal.setCategory(goalRequest.category());
+            goal.setCategory(goalRequest.category().toUpperCase());
             goal.setStartDate(startDate);
             goal.setEndDate(endDate);
             goal.setDescription(goalRequest.description());
