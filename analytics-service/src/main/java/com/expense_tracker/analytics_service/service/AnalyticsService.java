@@ -44,9 +44,9 @@ public class AnalyticsService {
             );
         }
 
-        Map.Entry<String, Double> topCategory = categoryTotals.entrySet().stream().max(Map.Entry.comparingByValue()).orElseGet(()->null);
+        Map.Entry<String, Double> topCategory = categoryTotals.entrySet().stream().max(Map.Entry.comparingByValue()).orElseGet(()-> null);
 
-        return new ExpenseSummaryDTO(totalSpent, categoryTotals, Map.of("category", Objects.requireNonNull(topCategory).getKey(), "amount", topCategory.getValue()), Map.of("startDate", startDate, "endDate",endDate));
+        return new ExpenseSummaryDTO(totalSpent, categoryTotals, Map.of("category", topCategory==null ? "" : topCategory.getKey(), "amount", topCategory==null ? 0.0 : topCategory.getValue()), Map.of("startDate", startDate, "endDate",endDate));
     }
 
 
