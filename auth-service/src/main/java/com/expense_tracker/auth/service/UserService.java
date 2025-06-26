@@ -6,6 +6,7 @@ import com.expense_tracker.auth.exception.UserNotFound;
 import com.expense_tracker.auth.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -16,6 +17,10 @@ public class UserService {
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    public List<UserResponseDto> getUsers() {
+        return userRepository.findAll().stream().map(u->new UserResponseDto(u.getEmail(),u.getName())).toList();
     }
 
     public UserResponseDto getUser(String email) {
