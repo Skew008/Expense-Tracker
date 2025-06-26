@@ -110,6 +110,22 @@ services:
     networks:
       - expense-net
 
+  # --------------------------------------
+  # Report Service
+  # --------------------------------------
+  report-service:
+    build: ./report-service
+    container_name: report-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - eureka-server
+      - auth-service
+      - analytics-service
+    networks:
+      - expense-net
+
+
 volumes:
   mysql_data:
 

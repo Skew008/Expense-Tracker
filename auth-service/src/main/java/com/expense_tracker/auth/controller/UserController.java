@@ -8,12 +8,19 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("users")
 public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @GetMapping("all")
+    public ResponseEntity<List<UserResponseDto>> getUsers() {
+        return ResponseEntity.ok(userService.getUsers());
+    }
 
     @GetMapping("me")
     public ResponseEntity<UserResponseDto> getUserDetails(Authentication authentication) {
