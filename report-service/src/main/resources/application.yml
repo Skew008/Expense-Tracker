@@ -5,6 +5,18 @@ spring:
   application:
     name: report-service
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: shreyanshtelrandhe234@gmail.com
+    password: fqco xtdp pmvy icnm
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 eureka:
   client:
     service-url:
