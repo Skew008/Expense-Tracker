@@ -1,0 +1,1220 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Expense Tracker API",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "{protocol}://{host}",
+      "description": "custom server",
+      "variables": {
+        "protocol": {
+          "enum": ["http", "https"],
+          "default": "http",
+          "description": "The protocol to use"
+        },
+        "host": {
+          "default": "localhost:8080",
+          "description": "The host name or IP address"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User login",
+        "description": "Authenticates a user using email and password. Returns a JWT token upon successful login.",
+        "operationId": "loginUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password"
+                  }
+                },
+                "required": ["email", "password"]
+              },
+              "example": {
+                "email": "user@example.com",
+                "password": "password123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "JWT access token"
+                    }
+                  }
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid login request"
+          },
+          "403": {
+            "description": "Authentication failed"
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "description": "Creates a new user account using the provided name, email, and password. No authentication required.",
+        "operationId": "registerUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" }
+                },
+                "required": ["name", "email", "password"]
+              },
+              "example": {
+                "name": "John Doe",
+                "email": "john@example.com",
+                "password": "strongPassword123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "409": {
+            "description": "User already exists"
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/change-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Change user password",
+        "description": "Allows an authenticated user to change their password by providing the current and new password.",
+        "operationId": "changeUserPassword",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "oldPassword": {
+                    "type": "string",
+                    "format": "password"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "format": "password"
+                  }
+                },
+                "required": ["oldPassword", "newPassword"]
+              },
+              "example": {
+                "oldPassword": "oldPassword123",
+                "newPassword": "newStrongPassword456"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Password Changed Successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid current password or bad input"
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get authenticated user details",
+        "description": "Returns the details of the currently authenticated user based on the JWT token.",
+        "operationId": "getCurrentUser",
+        "responses": {
+          "200": {
+            "description": "User details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  },
+                  "required": ["id", "name", "email"]
+                },
+                "example": {
+                  "name": "John Doe",
+                  "email": "john@example.com"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": ["User"],
+        "summary": "Update authenticated user's name",
+        "description": "Updates the name of the currently authenticated user using a request parameter.",
+        "operationId": "updateCurrentUser",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "New name for the user"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  },
+                  "required": ["name", "email"]
+                },
+                "example": {
+                  "name": "Jane Doe",
+                  "email": "john@example.com"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["User"],
+        "summary": "Delete authenticated user",
+        "description": "Deletes the account of the currently authenticated user based on the JWT token.",
+        "operationId": "deleteCurrentUser",
+        "responses": {
+          "200": {
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "User deleted Successfully"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/expense": {
+      "get": {
+        "tags": ["Expense"],
+        "summary": "Get all expenses for the authenticated user",
+        "description": "Retrieves a list of all expenses associated with the authenticated user's account.",
+        "operationId": "getUserExpenses",
+        "responses": {
+          "200": {
+            "description": "List of expenses retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string", "format": "uuid" },
+                      "email": { "type": "string" },
+                      "amount": { "type": "number", "format": "double" },
+                      "category": { "type": "string" },
+                      "description": { "type": "string" },
+                      "date": { "type": "string", "format": "date" }
+                    },
+                    "required": ["id", "amount", "category", "date"]
+                  }
+                },
+                "example": [
+                  {
+                    "id": "f1d1e3e9-7843-4f41-bf7b-d92f65b88a8b",
+                    "email": "john@example.com",
+                    "amount": 250.0,
+                    "category": "Food",
+                    "description": "Lunch at cafe",
+                    "date": "2025-06-15"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["Expense"],
+        "summary": "Add a new expense",
+        "description": "Adds a new expense record for the authenticated user.",
+        "operationId": "addExpense",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": { "type": "number", "format": "double" },
+                  "category": { "type": "string" },
+                  "description": { "type": "string" },
+                  "date": { "type": "string", "format": "date" }
+                },
+                "required": ["amount", "category", "date"]
+              },
+              "example": {
+                "amount": 500.0,
+                "category": "Groceries",
+                "description": "Weekly shopping",
+                "date": "2025-06-15"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Expense created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "email": { "type": "string" },
+                    "amount": { "type": "number", "format": "double" },
+                    "category": { "type": "string" },
+                    "description": { "type": "string" },
+                    "date": { "type": "string", "format": "date" }
+                  },
+                  "required": ["id", "amount", "category", "date"]
+                },
+                "example": {
+                  "id": "e9aa418c-d553-4a20-a2f4-7b0e066b2935",
+                  "email": "john@example.com",
+                  "amount": 500.0,
+                  "category": "Groceries",
+                  "description": "Weekly shopping",
+                  "date": "2025-06-15"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid expense input"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/expense/{id}": {
+      "get": {
+        "tags": ["Expense"],
+        "summary": "Get expense by ID",
+        "description": "Fetches the details of a specific expense by its ID for the authenticated user.",
+        "operationId": "getExpenseById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID of the expense to retrieve",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Expense details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "email": { "type": "string" },
+                    "amount": { "type": "number", "format": "double" },
+                    "category": { "type": "string" },
+                    "description": { "type": "string" },
+                    "date": { "type": "string", "format": "date" }
+                  },
+                  "required": ["id", "amount", "category", "date"]
+                },
+                "example": {
+                  "id": "a2c1dfc4-91de-4b2e-8f20-3f5f8a2bda0e",
+                  "email": "john@example.com",
+                  "amount": 200.0,
+                  "category": "Transport",
+                  "description": "Cab fare",
+                  "date": "2025-06-14"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID format or request"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          },
+          "404": {
+            "description": "Expense not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": ["Expense"],
+        "summary": "Update an existing expense",
+        "description": "Updates the specified expense for the authenticated user.",
+        "operationId": "updateExpenseById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID of the expense to update",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": { "type": "number", "format": "double" },
+                  "category": { "type": "string" },
+                  "description": { "type": "string" },
+                  "date": { "type": "string", "format": "date" }
+                },
+                "required": ["amount", "category", "date"]
+              },
+              "example": {
+                "amount": 300.0,
+                "category": "Utilities",
+                "description": "Electricity bill",
+                "date": "2025-06-13"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Expense updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Expense updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or ID format"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          },
+          "404": {
+            "description": "Expense not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["Expense"],
+        "summary": "Delete an expense",
+        "description": "Deletes a specific expense for the authenticated user by ID.",
+        "operationId": "deleteExpenseById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID of the expense to delete",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Expense deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Expense deleted successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID format or request"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          },
+          "404": {
+            "description": "Expense not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/expense/search": {
+      "get": {
+        "tags": ["Expense"],
+        "summary": "Search expenses with filters",
+        "description": "Searches expenses for the authenticated user by optional category and required date range.",
+        "operationId": "searchExpenses",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "description": "Expense category to filter by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "description": "Start date in yyyy-MM-dd format",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "description": "End date in yyyy-MM-dd format",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filtered expenses retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string", "format": "uuid" },
+                      "email": { "type": "string" },
+                      "amount": { "type": "number", "format": "double" },
+                      "category": { "type": "string" },
+                      "description": { "type": "string" },
+                      "date": { "type": "string", "format": "date" }
+                    },
+                    "required": ["id", "amount", "category", "date"]
+                  }
+                },
+                "example": [
+                  {
+                    "id": "3e1f2aa4-64b0-4f3b-8731-6a9a42e0291a",
+                    "email": "john@example.com",
+                    "amount": 120.0,
+                    "category": "Food",
+                    "description": "Dinner",
+                    "date": "2025-06-10"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid date format or missing parameters"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/goal": {
+      "post": {
+        "tags": ["Goal"],
+        "summary": "Create a budgeting goal",
+        "description": "Creates a new budgeting goal for the authenticated user.",
+        "operationId": "createGoal",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "amount": { "type": "number", "format": "double" },
+                  "category": { "type": "string" },
+                  "startDate": { "type": "string", "format": "date" },
+                  "endDate": { "type": "string", "format": "date" },
+                  "description": { "type": "string" }
+                },
+                "required": [
+                  "title",
+                  "amount",
+                  "category",
+                  "startDate",
+                  "endDate"
+                ]
+              },
+              "example": {
+                "title": "Monthly Groceries",
+                "amount": 5000,
+                "category": "Groceries",
+                "startDate": "2025-06-01",
+                "endDate": "2025-06-30",
+                "description": "Grocery budget for June"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Goal created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "email": { "type": "string", "format": "email" },
+                    "title": { "type": "string" },
+                    "amount": { "type": "number", "format": "double" },
+                    "category": { "type": "string" },
+                    "startDate": { "type": "string", "format": "date" },
+                    "endDate": { "type": "string", "format": "date" },
+                    "description": { "type": "string" }
+                  },
+                  "required": [
+                    "id",
+                    "email",
+                    "title",
+                    "amount",
+                    "category",
+                    "startDate",
+                    "endDate"
+                  ]
+                },
+                "example": {
+                  "id": "6c75f3b4-45b3-4b6b-85a2-d132f3eab987",
+                  "email": "user@example.com",
+                  "title": "Monthly Groceries",
+                  "amount": 5000,
+                  "category": "Groceries",
+                  "startDate": "2025-06-01",
+                  "endDate": "2025-06-30",
+                  "description": "Grocery budget for June"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid goal input"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": ["Goal"],
+        "summary": "Get all budgeting goals",
+        "description": "Retrieves all budgeting goals created by the authenticated user.",
+        "operationId": "getGoals",
+        "responses": {
+          "200": {
+            "description": "List of goals retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "title": { "type": "string" },
+                      "amount": { "type": "number", "format": "double" },
+                      "category": { "type": "string" },
+                      "startDate": { "type": "string", "format": "date" },
+                      "endDate": { "type": "string", "format": "date" },
+                      "description": { "type": "string" }
+                    },
+                    "required": [
+                      "id",
+                      "email",
+                      "title",
+                      "amount",
+                      "category",
+                      "startDate",
+                      "endDate"
+                    ]
+                  }
+                },
+                "example": [
+                  {
+                    "id": "f4a20b58-0a8c-49f1-9270-5e2dcb9cf10b",
+                    "email": "user@example.com",
+                    "title": "Vacation Budget",
+                    "amount": 10000.0,
+                    "category": "Travel",
+                    "startDate": "2025-07-01",
+                    "endDate": "2025-07-31",
+                    "description": "Budget for July trip"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/goal/{id}": {
+      "get": {
+        "tags": ["Goal"],
+        "summary": "Get goal by ID",
+        "description": "Fetches the details of a specific budgeting goal by its ID for the authenticated user.",
+        "operationId": "getGoalById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID of the goal to retrieve",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Goal retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "email": { "type": "string", "format": "email" },
+                    "title": { "type": "string" },
+                    "amount": { "type": "number", "format": "double" },
+                    "category": { "type": "string" },
+                    "startDate": { "type": "string", "format": "date" },
+                    "endDate": { "type": "string", "format": "date" },
+                    "description": { "type": "string" }
+                  },
+                  "required": [
+                    "id",
+                    "email",
+                    "title",
+                    "amount",
+                    "category",
+                    "startDate",
+                    "endDate"
+                  ]
+                },
+                "example": {
+                  "id": "c1df3a62-25f7-49e6-b0ea-b99e2faeb9e7",
+                  "email": "user@example.com",
+                  "title": "Emergency Fund",
+                  "amount": 15000.0,
+                  "category": "Savings",
+                  "startDate": "2025-06-01",
+                  "endDate": "2025-12-31",
+                  "description": "Build emergency savings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid goal ID or bad request"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          },
+          "404": {
+            "description": "Goal not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": ["Goal"],
+        "summary": "Update an existing goal",
+        "description": "Updates the specified budgeting goal for the authenticated user.",
+        "operationId": "updateGoalById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID of the goal to update",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "amount": { "type": "number", "format": "double" },
+                  "category": { "type": "string" },
+                  "startDate": { "type": "string", "format": "date" },
+                  "endDate": { "type": "string", "format": "date" },
+                  "description": { "type": "string" }
+                },
+                "required": [
+                  "title",
+                  "amount",
+                  "category",
+                  "startDate",
+                  "endDate"
+                ]
+              },
+              "example": {
+                "title": "Updated Travel Goal",
+                "amount": 8000,
+                "category": "Travel",
+                "startDate": "2025-07-01",
+                "endDate": "2025-07-20",
+                "description": "Budget for vacation trip"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Goal updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Goal updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid goal data or request"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          },
+          "404": {
+            "description": "Goal not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["Goal"],
+        "summary": "Delete a goal",
+        "description": "Deletes a specific budgeting goal for the authenticated user by its ID.",
+        "operationId": "deleteGoalById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID of the goal to delete",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Goal deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Deleted goal successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID format or request"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          },
+          "404": {
+            "description": "Goal not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/goal/{id}/progress": {
+      "get": {
+        "tags": ["Goal"],
+        "summary": "Get progress of a budgeting goal",
+        "description": "Retrieves the progress made toward a specific budgeting goal based on expenses and time.",
+        "operationId": "getGoalProgress",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID of the goal",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Goal progress retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "goalAmount": { "type": "number", "format": "double" },
+                    "spent": { "type": "number", "format": "double" },
+                    "remaining": { "type": "number", "format": "double" },
+                    "percentageUsed": { "type": "number", "format": "integer" }
+                  },
+                  "required": [
+                    "goalId",
+                    "title",
+                    "category",
+                    "targetAmount",
+                    "spentAmount",
+                    "progressPercentage",
+                    "startDate",
+                    "endDate"
+                  ]
+                },
+                "example": {
+                  "goalAmount": 5000,
+                  "spent": 3200,
+                  "remaining": 1800,
+                  "percentageUsed": 64.0
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid goal ID or bad request"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          },
+          "404": {
+            "description": "Goal not found or progress unavailable"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/analytics/overview": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get expense summary overview",
+        "description": "Provides a summarized overview of expenses within a date range, including totals, category breakdown, and top category.",
+        "operationId": "getExpenseOverview",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "description": "Start date in yyyy-MM-dd format",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "description": "End date in yyyy-MM-dd format",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Expense summary retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalSpent": { "type": "number", "format": "double" },
+                    "categoryBreakdown": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number",
+                        "format": "double"
+                      }
+                    },
+                    "topCategory": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "period": {
+                      "type": "object",
+                      "properties": {
+                        "from": { "type": "string", "format": "date" },
+                        "to": { "type": "string", "format": "date" }
+                      }
+                    }
+                  },
+                  "required": [
+                    "totalSpent",
+                    "categoryBreakdown",
+                    "topCategory",
+                    "period"
+                  ]
+                },
+                "example": {
+                  "totalSpent": 8500,
+                  "categoryBreakdown": {
+                    "Food": 3000,
+                    "Transport": 2000,
+                    "Entertainment": 1500,
+                    "Utilities": 2000
+                  },
+                  "topCategory": {
+                    "category": "Food",
+                    "amount": 3000
+                  },
+                  "period": {
+                    "from": "2025-06-01",
+                    "to": "2025-06-30"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input parameters"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid JWT token"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
