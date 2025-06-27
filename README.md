@@ -72,8 +72,8 @@ docker-compose up --build
 |--------|------------------------------|------------------------------|
 | POST   | `/auth/register`             | Register a new user         |
 | POST   | `/auth/login`                | Login and get JWT token     |
-| GET    | `/api/expenses`              | List all expenses           |
-| POST   | `/api/goals`                 | Create a budget goal        |
+| GET    | `/api/expense`              | List all expenses           |
+| POST   | `/api/goal`                 | Create a budget goal        |
 | GET    | `/api/analytics/overview`     | View analytics summary     |
 
 
