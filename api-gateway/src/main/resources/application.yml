@@ -32,6 +32,19 @@ spring:
           predicates:
             - Path=/analytics/**
 
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            exposedHeaders: "*"
+
 eureka:
   client:
     service-url:
